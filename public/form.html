@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TV Realtime Form</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 480px;
+        margin: 40px auto;
+        padding: 0 16px;
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+      }
+
+      input,
+      button {
+        font-size: 16px;
+        padding: 10px;
+      }
+
+      .status {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Send Data To TV Client</h1>
+    <form id="submit-form">
+      <input id="sessionId" name="sessionId" readonly />
+      <input id="fieldOne" name="fieldOne" placeholder="Field one" required />
+      <input id="fieldTwo" name="fieldTwo" placeholder="Field two" required />
+      <button type="submit">Send</button>
+    </form>
+    <p id="status" class="status"></p>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('sessionId') || '';
+      const statusNode = document.getElementById('status');
+      const sessionInput = document.getElementById('sessionId');
+      const formNode = document.getElementById('submit-form');
+
+      sessionInput.value = sessionId;
+
+      formNode.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        statusNode.textContent = 'Sending...';
+
+        const payload = {
+          sessionId,
+          fieldOne: document.getElementById('fieldOne').value,
+          fieldTwo: document.getElementById('fieldTwo').value,
+        };
+
+        const response = await fetch('/form/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorPayload = await response.json().catch(() => ({}));
+          statusNode.textContent =
+            errorPayload.message || 'Failed to send the message';
+          return;
+        }
+
+        statusNode.textContent = 'Sent to websocket client';
+        formNode.reset();
+        sessionInput.value = sessionId;
+      });
+    </script>
+  </body>
+</html>
