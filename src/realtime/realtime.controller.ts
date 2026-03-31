@@ -17,7 +17,7 @@ export class RealtimeController {
 
   @Get('form')
   getForm(@Res() response: Response): void {
-    response.sendFile(join(process.cwd(), 'public', 'form.html'));
+    response.sendFile(join(__dirname, '..', '..', 'public', 'form.html'));
   }
 
   @Post('form/submit')
